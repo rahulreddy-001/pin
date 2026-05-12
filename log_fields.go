@@ -21,7 +21,7 @@ func (fields Fields) Encode() string {
 			encoded += ","
 		}
 	}
-	if len(encoded) == 0 {
+	if len(encoded) == 1 {
 		return ""
 	}
 	return encoded + "}"
