@@ -2,7 +2,10 @@ package pin
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
+
+	"github.com/rahulreddy-001/pin"
 )
 
 type Encoder interface {
@@ -43,4 +46,11 @@ func (DefaultEncoder) Encode(l Log) string {
 	data, _ := json.Marshal(fieldsMap)
 	return string(data)
 
+}
+
+
+type DefaultCLIEncoder struct{}
+
+func (_ DefaultCLIEncoder) Encode(log pin.Log) string {
+	return fmt.Sprintf("[%s]  [%s] %s %s  %s  %s", log.Level, log.Name, log.Source, log.Timestamp.Local().Format(time.RFC1123), log.Message, log.Fields.Encode())
 }
