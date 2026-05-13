@@ -12,17 +12,15 @@ type Writer struct {
 	Encoder       Encoder
 	Writer        io.Writer
 	closeChan     chan struct{}
-	exitChan      chan struct{}
 }
 
-func NewWriter(writer io.Writer, buffer *Buffer, encoder Encoder) *Writer {
+func NewWriter(writer io.Writer, buffer *Buffer, encoder Encoder, flushInterval time.Duration) *Writer {
 	w := &Writer{
-		FlushInterval: time.Microsecond,
+		FlushInterval: flushInterval,
 		Buffer:        buffer,
 		Writer:        writer,
 		Encoder:       encoder,
 		closeChan:     make(chan struct{}),
-		exitChan:      make(chan struct{}),
 	}
 	go w.Flush()
 	return w
@@ -43,8 +41,7 @@ func (b *Writer) flush() {
 func (b *Writer) Flush() {
 	ticker := time.NewTicker(b.FlushInterval)
 	defer func() {
-		b.exitChan <- struct{}{}
-		close(b.exitChan)
+		b.closeChan <- struct{}{}
 		ticker.Stop()
 	}()
 

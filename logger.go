@@ -2,7 +2,6 @@ package pin
 
 import (
 	"fmt"
-	"io"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -15,13 +14,13 @@ type logger struct {
 	Writer *Writer
 }
 
-func NewLogger(name string, level LogLevel, writer io.Writer, encoder Encoder) *logger {
+func NewLogger(config *Config) *logger {
 	buffer := NewBuffer()
 	return &logger{
-		Name:   name,
-		Level:  level,
+		Name:   config.Name,
+		Level:  config.LogLevel,
 		Buffer: buffer,
-		Writer: NewWriter(writer, buffer, encoder),
+		Writer: NewWriter(config.Writer, buffer, config.Encoder, config.FlushInterval),
 	}
 }
 
@@ -36,8 +35,8 @@ func (l *logger) Clone(name string) *logger {
 
 func (l *logger) Flush() {
 	l.Writer.closeChan <- struct{}{}
+	<-l.Writer.closeChan
 	close(l.Writer.closeChan)
-	<-l.Writer.exitChan
 }
 
 func (l *logger) log(level LogLevel, msg string, fields ...Field) {
