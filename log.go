@@ -15,7 +15,7 @@ type Log struct {
 	Level     string    `json:"level"`
 	Timestamp time.Time `json:"timestamp"`
 	Message   string    `json:"message"`
-	Fields    Fields    `json:"fields"`
+	Fields    []Field   `json:"fields"`
 	Source    string    `json:"source,omitempty"`
 }
 
@@ -25,7 +25,7 @@ func (l *Log) Encode() string {
 
 type DefaultEncoder struct{}
 
-func (DefaultEncoder) Encode(l Log) string {
+func (_ DefaultEncoder) Encode(l Log) string {
 	fieldsMap := map[string]any{
 		"name":      l.Name,
 		"level":     l.Level,
@@ -46,9 +46,8 @@ func (DefaultEncoder) Encode(l Log) string {
 
 }
 
-
 type DefaultCLIEncoder struct{}
 
 func (_ DefaultCLIEncoder) Encode(log Log) string {
-	return fmt.Sprintf("[%s]  [%s] %s %s  %s  %s", log.Level, log.Name, log.Source, log.Timestamp.Local().Format(time.RFC1123), log.Message, log.Fields.Encode())
+	return fmt.Sprintf("[%s]  [%s] %s %s  %s  %s", log.Level, log.Name, log.Source, log.Timestamp.Local().Format(time.RFC1123), log.Message, encodeFields(log.Fields))
 }

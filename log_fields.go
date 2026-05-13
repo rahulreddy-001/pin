@@ -2,8 +2,6 @@ package pin
 
 import "fmt"
 
-type Fields []Field
-
 type Field struct {
 	Key   string
 	Value any
@@ -13,7 +11,7 @@ func Any(key string, val any) Field {
 	return Field{key, val}
 }
 
-func (fields Fields) Encode() string {
+func encodeFields(fields []Field) string {
 	encoded := "{"
 	for i, field := range fields {
 		encoded += fmt.Sprintf(`"%s":"%s"`, field.Key, field.Value)

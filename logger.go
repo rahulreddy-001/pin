@@ -8,44 +8,44 @@ import (
 )
 
 type logger struct {
-	Name   string
-	Level  LogLevel
-	Buffer *Buffer
-	Writer *Writer
+	name   string
+	level  LogLevel
+	buffer *buffer
+	writer *writer
 }
 
 func NewLogger(config *Config) *logger {
-	buffer := NewBuffer()
+	buffer := newBuffer()
 	return &logger{
-		Name:   config.Name,
-		Level:  config.LogLevel,
-		Buffer: buffer,
-		Writer: NewWriter(config.Writer, buffer, config.Encoder, config.FlushInterval),
+		name:   config.Name,
+		level:  config.LogLevel,
+		buffer: buffer,
+		writer: newWriter(config.Writer, buffer, config.Encoder, config.FlushInterval),
 	}
 }
 
 func (l *logger) Clone(name string) *logger {
 	return &logger{
-		Name:   name,
-		Level:  l.Level,
-		Buffer: l.Buffer,
-		Writer: l.Writer,
+		name:   name,
+		level:  l.level,
+		buffer: l.buffer,
+		writer: l.writer,
 	}
 }
 
 func (l *logger) Flush() {
-	l.Writer.closeChan <- struct{}{}
-	<-l.Writer.closeChan
-	close(l.Writer.closeChan)
+	l.writer.closeChan <- struct{}{}
+	<-l.writer.closeChan
+	close(l.writer.closeChan)
 }
 
 func (l *logger) log(level LogLevel, msg string, fields ...Field) {
-	if !level.IsGreaterThan(l.Level) {
+	if !level.IsGreaterThan(l.level) {
 		return
 	}
 
-	l.Buffer.Add(Log{
-		Name:      l.Name,
+	l.buffer.add(Log{
+		Name:      l.name,
 		Level:     level.GetLogLevel(),
 		Timestamp: time.Now(),
 		Message:   msg,

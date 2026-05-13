@@ -6,29 +6,29 @@ import (
 	"time"
 )
 
-type Writer struct {
+type writer struct {
 	FlushInterval time.Duration
-	Buffer        *Buffer
+	Buffer        *buffer
 	Encoder       Encoder
 	Writer        io.Writer
 	closeChan     chan struct{}
 }
 
-func NewWriter(writer io.Writer, buffer *Buffer, encoder Encoder, flushInterval time.Duration) *Writer {
-	w := &Writer{
+func newWriter(output io.Writer, buffer *buffer, encoder Encoder, flushInterval time.Duration) *writer {
+	w := &writer{
 		FlushInterval: flushInterval,
 		Buffer:        buffer,
-		Writer:        writer,
+		Writer:        output,
 		Encoder:       encoder,
 		closeChan:     make(chan struct{}),
 	}
-	go w.Flush()
+	go w.flushLoop()
 	return w
 }
 
-func (b *Writer) flush() {
+func (b *writer) flush() {
 	for {
-		logs := b.Buffer.GetLogs(100)
+		logs := b.Buffer.getLogs(100)
 		if len(logs) == 0 {
 			break
 		}
@@ -38,7 +38,7 @@ func (b *Writer) flush() {
 	}
 }
 
-func (b *Writer) Flush() {
+func (b *writer) flushLoop() {
 	ticker := time.NewTicker(b.FlushInterval)
 	defer func() {
 		b.closeChan <- struct{}{}

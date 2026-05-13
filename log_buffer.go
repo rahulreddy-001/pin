@@ -2,33 +2,33 @@ package pin
 
 import "sync"
 
-type Buffer struct {
+type buffer struct {
 	mu   sync.Mutex
 	logs []Log
 }
 
-func NewBuffer() *Buffer {
-	return &Buffer{
+func newBuffer() *buffer {
+	return &buffer{
 		mu:   sync.Mutex{},
 		logs: []Log{},
 	}
 }
 
-func (b *Buffer) Add(log Log) {
+func (b *buffer) add(log Log) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	b.logs = append(b.logs, log)
 }
 
-func (b *Buffer) AddLogs(logs ...Log) {
+func (b *buffer) addLogs(logs ...Log) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	b.logs = append(b.logs, logs...)
 }
 
-func (b *Buffer) GetLogs(count int) []Log {
+func (b *buffer) getLogs(count int) []Log {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	count = min(count, len(b.logs))
